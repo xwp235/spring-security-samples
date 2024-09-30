@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: security-starter
+  messages:
+    basename: messages
+    encoding: UTF-8
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/spring_security_demo?stringtype=unspecified&timezone=UTC&jvmZone=UTC
+    driver-class-name: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      username: postgres
+      password: 123456
+      connection-timeout: 30000
+      read-only: off
+      minimum-idle: 2
+      maximum-pool-size: 10
+      auto-commit: on
+      max-lifetime: 600000
+      idle-timeout: 300000
+      connection-test-query: select 1
+      validation-timeout: 1500
+      pool-name: spring-security-HikariCP
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.web.session: DEBUG
+  pattern:
+    console: '%clr(%d{E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint}
+                %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n'
+server:
+  error:
+    whitelabel:
+      enabled: on
+  servlet:
+    session:
+      timeout: 10m
