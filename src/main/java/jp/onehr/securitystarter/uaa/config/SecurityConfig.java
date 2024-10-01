@@ -5,7 +5,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -124,26 +127,28 @@ public class SecurityConfig {
                                 res.sendRedirect("/login");
                             })
             )
-                .sessionManagement(session->
-                        session
-                                .sessionAuthenticationStrategy(
-                                        new ChangeSessionIdAuthenticationStrategy()
-                                )
-                                .maximumSessions(1)
-                                .maxSessionsPreventsLogin(false)
+            .sessionManagement(session->
+                    session
+                            .sessionAuthenticationStrategy(
+                                    new ChangeSessionIdAuthenticationStrategy()
+                            )
+                            .maximumSessions(1)
+                            .maxSessionsPreventsLogin(false)
 //                                .expiredSessionStrategy()
-                )
-                // 记住我 和maximumSessions，maxSessionsPreventsLogin一起使用时会有问题
-                // 例如: 当使用记住我功能完成登录后关闭浏览器再打开，使用其他浏览器使用相同账号登录，此时maximumSessions，maxSessionsPreventsLogin就会失效
-                .rememberMe((remember) -> remember
-                        .rememberMeServices(rememberMeServices)
-                         .key("remember-me")
-                )
-                .authorizeHttpRequests((authorize) -> authorize
-                    .requestMatchers("/login","/webjars/**","/error").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/**").hasRole("USER")
-                        .anyRequest().authenticated());
+            )
+            // 记住我 和maximumSessions，maxSessionsPreventsLogin一起使用时会有问题
+            // 例如: 当使用记住我功能完成登录后关闭浏览器再打开，使用其他浏览器使用相同账号登录，此时maximumSessions，maxSessionsPreventsLogin就会失效
+            .rememberMe((remember) -> remember
+                    .rememberMeServices(rememberMeServices)
+                     .key("remember-me")
+            )
+            .authorizeHttpRequests((authorize) -> authorize
+                .requestMatchers("/login","/webjars/**","/error").permitAll()
+//                    .requestMatchers("/admin/**").hasRole("ADMIN")
+//                    .requestMatchers("/api/**").hasRole("USER")
+                    .anyRequest().access(new CustomAuthorizationManager())
+            );
+//                .apply(new PartSecurityConfig());
         return http.build();
     }
 
@@ -205,11 +210,11 @@ public class SecurityConfig {
 //        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 //        authenticationProvider.setPasswordEncoder(passwordEncoder);
 //        authenticationProvider.setUserDetailsService(userDetailsService);
+//        authenticationProvider.setUserDetailsPasswordService();
 //
 //        ProviderManager providerManager = new ProviderManager(authenticationProvider);
 //        providerManager.setEraseCredentialsAfterAuthentication(true);
 //        providerManager.setAuthenticationEventPublisher(authenticationEventPublisher);
-//        userDetailsService.setAuthenticationManager(providerManager);
 //        return providerManager;
 //    }
 
